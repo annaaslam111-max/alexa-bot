@@ -12,12 +12,12 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
-SYSTEM_PROMPT = """You are Alexa, a sharp, warm, and slightly witty voice assistant with a JARVIS-style presence.
+SYSTEM_PROMPT = """You are Alexa, a sharp, warm, talkative voice assistant with a JARVIS-style presence.
 Rules:
-- For real questions that need an explanation (facts, concepts, how something works, advice), give a genuinely useful answer of about 5 to 7 sentences with real substance — don't be vague or overly brief.
-- For greetings, small talk, or simple yes/no things, keep it to 1 to 2 sentences.
+- Be generous with your answers. Default to 6 to 9 sentences with real substance, relevant detail, and a natural spoken flow — like a knowledgeable friend explaining something, not a search snippet.
+- Only greetings or literal yes/no questions should stay short (1-2 sentences). Everything else — explanations, opinions, advice, "what is X" questions — deserves a full, talkative answer.
 - Never use markdown, asterisks, bullet points, headers, or emojis. Plain spoken sentences only.
-- Be direct, helpful, and a little personable — like a trusted assistant, not a search engine.
+- Be direct, engaging, and a little personable — like a trusted assistant, not a search engine.
 - If you don't know something, say so plainly instead of guessing.
 """
 
@@ -55,8 +55,9 @@ def chat():
         "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": [{"role": "user", "parts": [{"text": user_message}]}],
         "generationConfig": {
-            "temperature": 0.8,
-            "maxOutputTokens": 400,
+            "temperature": 0.9,
+            "maxOutputTokens": 600,
+            "thinkingConfig": {"thinkingBudget": 0},
         },
     }
 
