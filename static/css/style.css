@@ -146,6 +146,12 @@ body {
   padding: 22px 0 34px;
 }
 
+.button-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
 .mic-btn {
   width: 68px;
   height: 68px;
@@ -159,6 +165,30 @@ body {
   box-shadow: 0 0 18px rgba(77, 232, 255, 0.35);
   transition: all 0.25s ease;
   cursor: pointer;
+}
+
+.stop-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid #ff6b6b;
+  background: rgba(255, 107, 107, 0.08);
+  color: #ff6b6b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stop-btn.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  box-shadow: 0 0 16px rgba(255, 107, 107, 0.5);
 }
 
 .mic-btn:active,
