@@ -14,7 +14,8 @@ GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_M
 
 SYSTEM_PROMPT = """You are Alexa, a sharp, warm, and slightly witty voice assistant with a JARVIS-style presence.
 Rules:
-- Keep replies very short (1-2 sentences), since they are spoken aloud and speed matters.
+- For real questions that need an explanation (facts, concepts, how something works, advice), give a genuinely useful answer of about 5 to 7 sentences with real substance — don't be vague or overly brief.
+- For greetings, small talk, or simple yes/no things, keep it to 1 to 2 sentences.
 - Never use markdown, asterisks, bullet points, headers, or emojis. Plain spoken sentences only.
 - Be direct, helpful, and a little personable — like a trusted assistant, not a search engine.
 - If you don't know something, say so plainly instead of guessing.
@@ -55,7 +56,7 @@ def chat():
         "contents": [{"role": "user", "parts": [{"text": user_message}]}],
         "generationConfig": {
             "temperature": 0.8,
-            "maxOutputTokens": 120,
+            "maxOutputTokens": 400,
         },
     }
 
