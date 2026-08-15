@@ -82,8 +82,32 @@ function stripWakeWord(text) {
 function handleCommand(text) {
   addLine(text, 'user');
   sendToAlexa(text);
-  awake = false;
-  setStatus('SAY "HEY ALEXA"');
+  // Stay "awake" — no need to repeat "Hey Alexa" again this session.
+  // Tap the mic to fully stop listening if you want to require the wake word again.
+  setStatus('LISTENING');
+}
+
+let restartTimer = null;
+
+// Android Chrome (and others) silently drop continuous recognition after a single
+// utterance regardless of continuous:true, so we have to manually restart it every
+// time it ends — retrying if start() fails, and waiting for text-to-speech to finish
+// first so the mic and speaker don't fight each other.
+function attemptRestart(delay = 150) {
+  if (!shouldRun) return;
+  clearTimeout(restartTimer);
+  restartTimer = setTimeout(() => {
+    if (!shouldRun || listening) return;
+    if (window.speechSynthesis.speaking) {
+      attemptRestart(400);
+      return;
+    }
+    try {
+      recognition.start();
+    } catch (e) {
+      attemptRestart(400); // e.g. "already started" — try again shortly
+    }
+  }, delay);
 }
 
 if (SpeechRecognition) {
@@ -101,13 +125,8 @@ if (SpeechRecognition) {
   recognition.onend = () => {
     listening = false;
     micBtn.classList.remove('listening');
-    // Browsers auto-stop continuous recognition after a while — restart if still enabled
     if (shouldRun) {
-      setTimeout(() => {
-        if (shouldRun) {
-          try { recognition.start(); } catch (e) {}
-        }
-      }, 250);
+      attemptRestart();
     } else {
       setStatus('STANDBY');
     }
@@ -152,6 +171,7 @@ micBtn.addEventListener('click', () => {
   if (shouldRun) {
     shouldRun = false;
     awake = false;
+    clearTimeout(restartTimer);
     recognition.stop();
     setStatus('STANDBY');
     hint.textContent = 'Tap to enable "Hey Alexa"';
@@ -204,7 +224,8 @@ function speak(text) {
   };
   utter.onend = () => {
     micBtn.classList.remove('speaking');
-    setStatus('STANDBY');
+    setStatus(shouldRun ? (awake ? 'LISTENING' : 'SAY "HEY ALEXA"') : 'STANDBY');
+    if (shouldRun && !listening) attemptRestart(150);
   };
 
   window.speechSynthesis.cancel();
