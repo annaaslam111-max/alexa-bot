@@ -110,10 +110,13 @@ function attemptRestart(delay = 150) {
   }, delay);
 }
 
+let wakeHandledIndex = -1; // prevents double-processing the same utterance once caught via interim result
+
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
   recognition.continuous = true;
-  recognition.interimResults = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 3;
   recognition.lang = 'en-US';
 
   recognition.onstart = () => {
@@ -139,25 +142,37 @@ if (SpeechRecognition) {
   };
 
   recognition.onresult = (event) => {
-    const result = event.results[event.results.length - 1];
-    if (!result.isFinal) return;
-    const said = result[0].transcript.trim();
-    if (!said) return;
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i];
+      const said = result[0].transcript.trim();
+      const confidence = result[0].confidence;
+      if (!said || said.length < 2) continue;
+      if (typeof confidence === 'number' && confidence > 0 && confidence < 0.35) continue;
 
-    if (!awake) {
-      const command = stripWakeWord(said);
-      if (command === null) return; // wake word not heard, ignore ambient speech
-      window.speechSynthesis.cancel();
-      playChime();
-      if (command.length > 0) {
-        // e.g. "hey alexa what's the weather" said in one breath
-        handleCommand(command);
+      if (!awake) {
+        // Check EVERY update (interim or final) so the wake word triggers the instant
+        // it's spoken, instead of waiting for the browser to finalize the whole sentence.
+        if (i === wakeHandledIndex) {
+          if (result.isFinal) wakeHandledIndex = -1; // this utterance is done, reset for next time
+          continue;
+        }
+        const command = stripWakeWord(said);
+        if (command === null) continue;
+
+        window.speechSynthesis.cancel();
+        playChime();
+        if (command.length > 0) {
+          handleCommand(command);
+        } else {
+          awake = true;
+          setStatus('LISTENING');
+        }
+        if (!result.isFinal) wakeHandledIndex = i; // skip the final version of this same utterance
       } else {
-        awake = true;
-        setStatus('LISTENING');
+        // Actual commands still wait for a final result so we don't cut you off mid-sentence
+        if (!result.isFinal) continue;
+        handleCommand(said);
       }
-    } else {
-      handleCommand(said);
     }
   };
 } else {
@@ -208,6 +223,33 @@ async function sendToAlexa(message) {
   }
 }
 
+// ---------- Voice selection: pick the strongest available en-US voice ----------
+let cachedVoice = null;
+
+function pickBestVoice() {
+  if (cachedVoice) return cachedVoice;
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+
+  // Preference order: high-quality Google/Neural/online voices first, then any en-US, then any English
+  const preferredNames = ['Google US English', 'Microsoft Aria Online', 'Microsoft Guy Online'];
+  let voice =
+    voices.find((v) => preferredNames.includes(v.name)) ||
+    voices.find((v) => /en-US/i.test(v.lang) && /Google|Neural|Online/i.test(v.name)) ||
+    voices.find((v) => v.lang === 'en-US') ||
+    voices.find((v) => /^en/i.test(v.lang));
+
+  cachedVoice = voice || null;
+  return cachedVoice;
+}
+
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    cachedVoice = null;
+    pickBestVoice();
+  };
+}
+
 // ---------- Speech synthesis (TTS) ----------
 function speak(text) {
   if (!('speechSynthesis' in window)) {
@@ -215,8 +257,11 @@ function speak(text) {
     return;
   }
   const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 1.02;
-  utter.pitch = 1.0;
+  const voice = pickBestVoice();
+  if (voice) utter.voice = voice;
+  utter.volume = 1.0;
+  utter.rate = 1.0;
+  utter.pitch = 0.95;
 
   utter.onstart = () => {
     micBtn.classList.add('speaking');
