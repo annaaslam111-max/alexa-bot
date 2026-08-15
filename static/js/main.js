@@ -7,6 +7,7 @@ if ('serviceWorker' in navigator) {
 
 // ---------- DOM refs ----------
 const micBtn = document.getElementById('mic-btn');
+const stopBtn = document.getElementById('stop-btn');
 const statusText = document.getElementById('status-text');
 const transcript = document.getElementById('transcript');
 const placeholder = document.getElementById('placeholder');
@@ -265,10 +266,12 @@ function speak(text) {
 
   utter.onstart = () => {
     micBtn.classList.add('speaking');
+    stopBtn.classList.add('visible');
     setStatus('SPEAKING');
   };
   utter.onend = () => {
     micBtn.classList.remove('speaking');
+    stopBtn.classList.remove('visible');
     setStatus(shouldRun ? (awake ? 'LISTENING' : 'SAY "HEY ALEXA"') : 'STANDBY');
     if (shouldRun && !listening) attemptRestart(150);
   };
@@ -276,6 +279,22 @@ function speak(text) {
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utter);
 }
+
+// ---------- Interrupt button: stop Alexa mid-answer ----------
+stopBtn.addEventListener('click', () => {
+  if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) return;
+  window.speechSynthesis.cancel(); // triggers utter.onend above, which handles cleanup + restart
+
+  // Some Android WebViews don't reliably fire onend after cancel() — force cleanup as a fallback
+  setTimeout(() => {
+    if (!window.speechSynthesis.speaking) {
+      micBtn.classList.remove('speaking');
+      stopBtn.classList.remove('visible');
+      setStatus(shouldRun ? (awake ? 'LISTENING' : 'SAY "HEY ALEXA"') : 'STANDBY');
+      if (shouldRun && !listening) attemptRestart(150);
+    }
+  }, 200);
+});
 
 // ================= Three.js HUD orb =================
 const container = document.getElementById('hud-canvas');
