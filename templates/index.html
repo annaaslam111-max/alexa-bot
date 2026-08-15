@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ALEXA</title>
+<meta name="theme-color" content="#03060a">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="scan-overlay"></div>
+  <div class="vignette"></div>
+
+  <header class="brand">
+    <span class="brand-mark">ALEXA</span>
+    <span class="brand-sub">VOICE INTERFACE — ONLINE</span>
+  </header>
+
+  <main class="stage">
+    <div id="hud-canvas"></div>
+
+    <div class="status-ring">
+      <span id="status-text">STANDBY</span>
+    </div>
+
+    <div class="transcript" id="transcript">
+      <p class="transcript-placeholder" id="placeholder">Tap the core or press the mic to talk to Alexa.</p>
+    </div>
+  </main>
+
+  <footer class="controls">
+    <button id="mic-btn" class="mic-btn" aria-label="Talk to Alexa">
+      <svg viewBox="0 0 24 24" width="26" height="26">
+        <path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/>
+        <path fill="currentColor" d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-2.08A7 7 0 0 0 19 11z"/>
+      </svg>
+    </button>
+    <p class="hint" id="hint">Tap to enable "Hey Alexa"</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

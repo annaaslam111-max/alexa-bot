@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600&display=swap');
+
+:root {
+  --cyan: #4de8ff;
+  --cyan-dim: #1a5c6e;
+  --bg: #03060a;
+  --bg-panel: rgba(6, 18, 24, 0.35);
+  --text-dim: #7fa9b3;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--cyan);
+  font-family: 'Rajdhani', sans-serif;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Ambient scanlines + vignette for HUD feel */
+.scan-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(77, 232, 255, 0.02) 0px,
+    rgba(77, 232, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  z-index: 5;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+  z-index: 4;
+}
+
+.brand {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0 8px;
+  letter-spacing: 0.4em;
+}
+
+.brand-mark {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(77, 232, 255, 0.6);
+}
+
+.brand-sub {
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  color: var(--text-dim);
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+#hud-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+#hud-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.status-ring {
+  position: relative;
+  z-index: 2;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.5em;
+  color: var(--cyan);
+  margin-top: 190px;
+  text-shadow: 0 0 8px rgba(77, 232, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.transcript {
+  position: relative;
+  z-index: 2;
+  width: min(88%, 460px);
+  min-height: 90px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(77, 232, 255, 0.25);
+  border-radius: 4px;
+  backdrop-filter: none;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #cdeef5;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+.transcript-placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 14px;
+}
+
+.transcript .line { margin-bottom: 8px; }
+.transcript .line.user { color: var(--cyan); opacity: 0.8; }
+.transcript .line.bot { color: #eafcff; }
+
+.controls {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 0 34px;
+}
+
+.mic-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+  background: rgba(77, 232, 255, 0.06);
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 18px rgba(77, 232, 255, 0.35);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.mic-btn:active,
+.mic-btn.listening {
+  background: rgba(77, 232, 255, 0.25);
+  box-shadow: 0 0 30px rgba(77, 232, 255, 0.8);
+  transform: scale(1.05);
+}
+
+.mic-btn.speaking {
+  border-color: #9dffcf;
+  color: #9dffcf;
+  box-shadow: 0 0 30px rgba(157, 255, 207, 0.6);
+}
+
+.hint {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+}
+
+@media (max-width: 480px) {
+  .status-ring { margin-top: 150px; }
+  .brand-mark { font-size: 18px; letter-spacing: 0.3em; }
+}
