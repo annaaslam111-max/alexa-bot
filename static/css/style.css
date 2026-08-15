@@ -146,10 +146,9 @@ body {
   padding: 22px 0 34px;
 }
 
-.button-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+.mic-wrap {
+  position: relative;
+  display: inline-flex;
 }
 
 .mic-btn {
@@ -168,27 +167,31 @@ body {
 }
 
 .stop-btn {
-  width: 46px;
-  height: 46px;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid #ff6b6b;
-  background: rgba(255, 107, 107, 0.08);
+  background: #12080a;
   color: #ff6b6b;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transform: scale(0.8);
+  transform: scale(0.6);
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 2;
 }
 
 .stop-btn.visible {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
-  box-shadow: 0 0 16px rgba(255, 107, 107, 0.5);
+  box-shadow: 0 0 14px rgba(255, 107, 107, 0.55);
 }
 
 .mic-btn:active,
@@ -213,4 +216,5 @@ body {
 @media (max-width: 480px) {
   .status-ring { margin-top: 150px; }
   .brand-mark { font-size: 18px; letter-spacing: 0.3em; }
+  .stop-btn { width: 36px; height: 36px; top: -8px; right: -8px; }
 }
